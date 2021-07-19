@@ -33,47 +33,84 @@ function createGallery(gallery) {
 
 const imgGallery = createGallery(galleryItems);
 refs.galleryListRef.insertAdjacentHTML('beforeend', imgGallery);
+
 refs.galleryListRef.addEventListener('click', onClickGalleryItem);
+refs.btnModalClose.addEventListener('click', onCloseButtonClick);
+refs.lightboxOverlay.addEventListener('click', onCloseOverlayClick);
 
 function onClickGalleryItem(evt) {
     evt.preventDefault();
     window.addEventListener('keydown', onClickEsc);
-    const target = e.target;
+    const target = evt.target;
     if (target.nodeName !== 'IMG') {
         return;
     }
-
-    refs.backdropRef.classList.add('is-open');
-    refs.lightboxImg.src = target.dataset.source;
-    refs.lightboxImg.alt = target.alt;
-    refs.lightboxImg.dataset.index = e.target.dataset.index;
+    if (target.nodeName === 'IMG') {
+        refs.backdropRef.classList.add('is-open');
+        refs.lightboxImg.src = target.dataset.source;
+        refs.lightboxImg.alt = target.alt;
+        refs.lightboxImg.dataset.index = evt.target.dataset.index;
+    }
 }
 
 function onClickCloseModal() {
-    refs.backdrop.classList.remove('is-open');
+    refs.backdropRef.classList.remove('is-open');
 }
 
-refs.btnModalClose.onclick = e => {
+function onCloseButtonClick(evt) {
     window.removeEventListener('keydown', onClickEsc);
 
-    e.preventDefault();
+    evt.preventDefault();
     onClickCloseModal();
 
     refs.lightboxImg.src = '';
     refs.lightboxImg.alt = '';
-};
+}
 
-refs.lightboxOverlay.onclick = e => {
-    if (e.target === e.currentTarget) {
-        onClickCloseModal();
-    }
-};
-
-function onClickEsc(e) {
-    const ESC_KEY_CODE = 'Escape';
-    if (e.code === ESC_KEY_CODE) {
+function onCloseOverlayClick(evt) {
+    if (evt.target === evt.currentTarget) {
         onClickCloseModal();
     }
 }
 
-window.addEventListener('keydown', e => {if})
+function onClickEsc(evt) {
+    const ESC_KEY_CODE = 'Escape';
+    if (evt.code === ESC_KEY_CODE) {
+        onClickCloseModal();
+    }
+}
+
+window.addEventListener('keydown', evt => {
+    if (evt.code === 'ArrowLeft') {
+        onArrowLeft();
+    }
+    if (evt.code === 'ArrowRight') {
+        onArrowRight();
+    }
+});
+
+function onArrowLeft() {
+    const index = +refs.lightboxImg.dataset.index;
+
+    if (index === 0) {
+        newSrc(index, galleryItems.length - 1);
+        return;
+    }
+    newSrc(index, -1);
+}
+
+function onArrowRight() {
+    const index = +refs.lightboxImg.dataset.index;
+    if (index === galleryItems.length - 1) {
+        newSrc(0);
+        return;
+    }
+    newSrc(index, 1);
+}
+
+function newSrc(index, step = 0) {
+    refs.lightboxImg.dataset.index = `${index + step}`;
+    refs.lightboxImg.src = galleryItems[index + step].original;
+}
+
+console.log('Дмитрий, ошибок не обнаружено');
